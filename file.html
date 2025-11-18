@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OnlyOffice File Editor</title>
+  <script src="https://68ba9cac.docs.onlyoffice.com/web-apps/apps/api/documents/api.js"></script>
+  <style>
+    html, body, #onlyoffice-editor {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="onlyoffice-editor"></div>
+
+  <script type="module">
+    
+  import { SignJWT } from "https://esm.sh/jose@4.15.0/dist/browser/index.js";
+
+    async function loadFile() {
+      try {
+        const secretKey = new TextEncoder().encode(
+          "a78f3a46fd25466ab75907175a313f01"
+        );
+
+        const tokenPayload = {
+          document: {
+            fileType: "docx",
+            key: "2041572577486",
+            title: "Employee training.pdf",
+            url: "https://mstrategygroup-demo.box.com/shared/static/s70qz5v3sdvbbqqy7olsn4gm7gi0nqiy.pdf",
+            permissions: { edit: true, download: true },
+          },
+          documentType: "pdf",
+          editorConfig: {
+            customization: {
+              autoSave: true,
+              uiTheme: "default-light",
+              features: { tabBackground: { mode: "toolbar" } },
+            },
+          },
+        };
+
+        const token = await new SignJWT(tokenPayload)
+          .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+          .setIssuedAt()
+          .setExpirationTime("1h")
+          .sign(secretKey);
+
+        new window.DocsAPI.DocEditor("onlyoffice-editor", {
+          ...tokenPayload,
+          token,
+          width: "100%",
+          height: "100%",
+        });
+
+      } catch (error) {
+        console.error("Error loading file:", error);
+        alert("Error loading document.");
+      }
+    }
+
+    loadFile();
+  </script>
+</body>
+</html>
